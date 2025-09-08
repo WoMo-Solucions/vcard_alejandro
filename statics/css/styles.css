@@ -6,8 +6,8 @@
 }
 
 :root {
-  --color-ambar: #FFD700;
-  --color-ambar-claro: rgba(245, 222, 179, 0.7);
+  --color-principal: #4DB6AC;            /* un verde-azulado suave */
+  --color-principal-claro: rgba(77, 182, 172, 0.6);
 }
 
 body {
