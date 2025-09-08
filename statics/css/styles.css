@@ -272,3 +272,36 @@ body {
     padding-bottom: 40px !important; /* más espacio abajo */
   }
 }
+
+/* ===========================================================
+   PARCHE MÓVIL (solo elimina espacios en blanco en celulares)
+   No rompe nada más de tu diseño.
+   =========================================================== */
+@media (max-width: 480px) {
+  /* Quita el “centrado vertical” que genera aire extra en móvil */
+  body {
+    display: block !important;
+    min-height: auto !important;
+    padding: 12px !important;
+  }
+
+  /* Evita encogimiento + huecos: muestra la tarjeta a escala real */
+  .vcard {
+    transform: none !important;          /* sin escala en móvil */
+    margin: 0 auto !important;           /* centrada horizontal */
+    max-width: 100% !important;          /* usa todo el ancho disponible */
+    min-height: auto !important;         /* que crezca según contenido */
+  }
+
+  /* Ajuste suave del header degradado para no “comerse” el contenido */
+  .amber-fade { height: 50% !important; }
+
+  /* Mantén respiración sin provocar scroll vacío */
+  .content {
+    padding-top: 18px !important;
+    padding-bottom: 16px !important;
+  }
+
+  /* Evita que el texto quede más angosto de lo necesario */
+  .mensaje-box { max-width: 100% !important; }
+}
