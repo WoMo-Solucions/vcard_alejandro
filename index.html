@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julian Ramirez | Tarjeta Digital</title>
+  <link rel="stylesheet" href="./statics/css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="vcard">
+    <div class="amber-fade"></div>
+    <div class="bg-pattern"></div>
+
+    <div class="content">
+      <!-- Foto -->
+      <div class="photo-frame">
+        <img src="./statics/img/foto.jpg" alt="Foto de perfil"
+             onerror="this.src='https://via.placeholder.com/400'">
+      </div>
+
+      <!-- Info -->
+      <div class="info">
+        <h1></h1> <!-- Nombre -->
+        <h2></h2> <!-- Empresa -->
+        <div class="details">
+          <p class="cargo"><i class="fas fa-briefcase"></i></p> <!-- Cargo -->
+          <!-- Certificado Profesional (se muestra solo si existe en VCF) -->
+          <p id="credencial" class="cargo credencial" hidden>
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            <span></span>
+          </p>
+                <p class="ubicacion uni"><i class="fas fa-university"></i></p> <!-- Universidad -->
+          <p class="ubicacion direccion"><i class="fas fa-map-marker-alt"></i></p> <!-- Dirección -->
+        </div>
+      </div>
+
+      <!-- Redes -->
+      <div class="social">
+        <a href="#" class="linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="github" title="GitHub"><i class="fab fa-github"></i></a>
+        <a href="#" class="email" title="Email"><i class="fas fa-envelope"></i></a>
+        <a href="#" class="instagram" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+
+      <!-- Mensaje -->
+      <div class="mensaje-box">
+        <div class="mensaje">
+          <p></p>
+        </div>
+      </div>
+        <!-- Guardar contacto -->
+        <div class="guardar-contacto">
+          <a href="#" id="guardarContacto" title="Guardar contacto">
+            <i class="fas fa-address-book"></i>
+          </a>
+        </div>
+    </div>
+  </div>
+
+  <!-- Script unificado -->
+  <script src="./statics/js/scripts.js"></script>
+</body>
+</html>

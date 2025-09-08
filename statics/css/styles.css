@@ -1,0 +1,274 @@
+/* Reset y estilos base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-ambar: #FFD700;
+  --color-ambar-claro: rgba(245, 222, 179, 0.7);
+}
+
+body {
+  font-family: 'Rubik', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8f8f8;
+  padding: 15px;
+}
+
+/* Contenedor principal compacto */
+.vcard {  
+  margin: -30px 0; /* Compensa el espacio extra creado por el escalado */
+  transform: scale(0.75); /* Reduce todo al 90% */
+  position: relative;
+  width: 100%;
+  max-width: 360px; /* Un poco más ancho */
+  min-height: 540px; /* Más compacto verticalmente */
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: white;
+}
+
+/* Fondo degradado ámbar ajustado */
+.amber-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 62%; /* Cobertura ajustada */
+  background: linear-gradient(to bottom, 
+    var(--color-ambar) 0%,
+    var(--color-ambar-claro) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: 1;
+  opacity: 0.4;
+}
+
+/* Fondo de imagen */
+.bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../img/fondo.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 2;
+}
+
+/* Contenido principal - Compacto */
+.content {
+  position: relative;
+  z-index: 3;
+  padding: 15px 20px 10px; /* Menos padding inferior */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Foto de perfil - Posición más alta */
+.photo-frame {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 4px solid white;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  margin: 10px 0 5px; /* Margen superior reducido */
+  background: #f1f1f1;
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Información textual - Más compacta */
+.info {
+  text-align: center;
+  margin: 5px 0 10px; /* Menos espacio */
+}
+
+.info h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 3px; /* Reducido */
+}
+
+.info h2 {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 15px; /* Reducido */
+  font-weight: 500;
+}
+
+.details p {
+  font-size: 14px;
+  color: #444;
+  margin: 8px 0; /* Reducido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Botones sociales - Posición más alta */
+.social {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0 15px; /* Margen superior reducido */
+  flex-wrap: wrap;
+}
+
+.social a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  text-decoration: none;
+  transition: transform 0.3s;
+}
+
+.social a:hover {
+  transform: translateY(-3px);
+}
+
+.linkedin { background: #0077B5; }
+.github { background: #333; }
+.email { background: #D44638; }
+.instagram { background: linear-gradient(45deg, #405DE6, #833AB4, #C13584, #E1306C, #FD1D1D); }
+.whatsapp { background: #25D366; }
+
+/* Mensaje - Ajustes específicos */
+.mensaje-box {
+  width: 100%;
+  max-width: 320px; /* Más ancho */
+  margin: 5px auto 10px; /* Posición más alta */
+  padding: 0;
+}
+
+.mensaje {
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: justify;
+  text-justify: inter-word;
+  color: #555;
+  padding: 14px;
+  background: transparent; /* Fondo transparente */
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.05); /* Borde muy sutil */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03); /* Sombra ligera */
+}
+
+/* Responsive para todos los dispositivos */
+@media (max-width: 400px) {
+  .vcard {
+    max-width: 320px;
+    min-height: 520px;
+  }
+  
+  .photo-frame {
+    width: 130px;
+    height: 130px;
+  }
+  
+  .mensaje-box {
+    max-width: 290px;
+  }
+}
+
+@media (max-height: 700px) {
+  .vcard {
+    min-height: 500px;
+    transform: scale(0.95);
+  }
+  
+  .content {
+    padding: 12px 15px 8px;
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .vcard {
+    max-width: 380px;
+  }
+  
+  .mensaje-box {
+    max-width: 340px;
+  }
+}
+
+/* Botón de Guardar Contacto - Flotante y sin afectar el layout */
+.guardar-contacto {
+  position: absolute; /* Lo saca del flujo normal */
+  bottom: 10px;      /* Distancia desde abajo */
+  right: 20px;       /* Distancia desde la derecha */
+  z-index: 10;       /* Asegura que esté por encima de todo */
+}
+
+.guardar-contacto a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #4285F4 !important; /* Azul Google */
+  color: white !important;              /* Icono blanco */
+  font-size: 1.2em;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.guardar-contacto a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/*VCF*/
+.guardar-contacto a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4285F4; /* azul estilo Google */
+  color:  white; 
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 1.5em;
+  transition: background-color 0.3s;
+}
+
+.guardar-contacto a:hover {
+  background-color: #3367D6;
+}
+
+@media (max-width: 480px) {
+  .vcard {
+    max-width: 92% !important;   /* usa casi todo el ancho disponible */
+    min-height: 540px !important; /* más altura */
+  }
+
+  .content {
+    padding-top: 40px !important;   /* más espacio arriba */
+    padding-bottom: 40px !important; /* más espacio abajo */
+  }
+}
