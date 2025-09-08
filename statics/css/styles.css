@@ -305,3 +305,20 @@ body {
   /* Evita que el texto quede más angosto de lo necesario */
   .mensaje-box { max-width: 100% !important; }
 }
+/* === FORZAR TEAL EN CELULARES (override mínimo) === */
+@media (max-width: 480px) {
+  /* si algún CSS viejo redefine variables, re-decláralas aquí */
+  :root {
+    --color-principal: #4DB6AC;
+    --color-principal-claro: rgba(77, 182, 172, 0.6);
+  }
+  /* y fuerza el fondo en la capa del degradado */
+  .amber-fade {
+    background: linear-gradient(
+      to bottom,
+      var(--color-principal) 0%,
+      var(--color-principal-claro) 60%,
+      rgba(255, 255, 255, 0) 100%
+    ) !important;
+  }
+}
