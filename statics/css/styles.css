@@ -42,8 +42,8 @@ body {
   width: 100%;
   height: 62%; /* Cobertura ajustada */
   background: linear-gradient(to bottom, 
-    var(--color-ambar) 0%,
-    var(--color-ambar-claro) 60%,
+    var(--color-principal) 0%,
+    var(--color-principal-claro) 60%,
     rgba(255, 255, 255, 0) 100%
   );
   z-index: 1;
