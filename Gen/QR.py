@@ -1,193 +1,104 @@
+# qr_generator.py
+# Requisitos: pip install qrcode[pil] pillow
+
 import qrcode
-from PIL import Image, ImageDraw
-import math
+from PIL import Image, ImageOps
+import os
 
-# ---------- CONFIG ----------
-qr_data = "https://womo-solucions.github.io/Vcard/"
-logo_text_path = "logo.png"   # imagen con las letras JR (se usará como molde)
-qr_logo_path = "logo.png"     # logo que irá en el centro (puede ser el mismo archivo)
-out_path = "QR_Ing Juli.png"
-html_output_path = "index.html"
+# ================== CONFIG ==================
+qr_data = "https://womo-solucions.github.io/vcard_alejandro/"  # <-- Tu URL
+qr_logo_path = "logo.png"      # <-- Logo que irá en el centro (PNG recomendado con fondo transp.)
+out_path = "QR.png"            # <-- Salida del QR
+box_size = 12                  # Tamaño del módulo del QR (px)
+border = 4                     # Borde del QR (módulos)
+logo_scale = 0.22              # Proporción del lado del logo vs. lado del QR (0.15 - 0.30 funciona bien)
+white_pad = 18                 # Padding blanco alrededor del logo (px)
+rounded_white_box = True       # Caja blanca con bordes redondeados
+white_box_radius = 18          # Radio de la caja blanca
+recolor_qr = False             # Si True, recolorea módulos negros con un degradado
+color_top = (20, 50, 95)       # Arriba (si recolor_qr=True)
+color_bottom = (70, 150, 160)  # Abajo (si recolor_qr=True)
+# ============================================
 
-box_size = 10      # tamaño en px de cada módulo del QR (puedes ajustar)
-border = 4         # borde en módulos del QR
-# ----------------------------
 
-# Metales/colores para degradado (ajusta si quieres otro tono)
-color_top = (20, 50, 95)    # azul oscuro (arriba)
-color_bottom = (70, 150, 160)  # azul-verdoso claro (abajo)
+def make_qr_image(data: str, box_size: int = 10, border: int = 4):
+    qr = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=box_size,
+        border=border,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    return qr.make_image(fill_color="black", back_color="white").convert("RGBA")
 
-# Tamaño del logo central (en píxeles). Ajusta si necesitas logo más grande.
-logo_size = 80
-blank_margin = 6  # espacio extra (px) alrededor del logo dentro del área blanca
 
-# 1. Generar QR base (alto nivel de corrección para permitir overlay)
-qr = qrcode.QRCode(
-    error_correction=qrcode.constants.ERROR_CORRECT_H,
-    box_size=box_size,
-    border=border
-)
-qr.add_data(qr_data)
-qr.make(fit=True)
+def recolor_qr_vertical(img: Image.Image, top_rgb, bottom_rgb) -> Image.Image:
+    """Recolorea (solo donde es negro) con un degradado vertical."""
+    img = img.copy()
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        t = y / max(h - 1, 1)
+        r = int(top_rgb[0] * (1 - t) + bottom_rgb[0] * t)
+        g = int(top_rgb[1] * (1 - t) + bottom_rgb[1] * t)
+        b = int(top_rgb[2] * (1 - t) + bottom_rgb[2] * t)
+        for x in range(w):
+            r0, g0, b0, a0 = px[x, y]
+            # Recolorear solo módulos negros puros
+            if (r0, g0, b0) == (0, 0, 0):
+                px[x, y] = (r, g, b, a0)
+    return img
 
-qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
-w, h = qr_img.size
 
-# 2. Crear máscara a partir de tu logo (molde de las letras "JR")
-logo_text = Image.open(logo_text_path).convert("RGBA")
+def paste_logo_center(base: Image.Image, logo_path: str, scale: float, pad: int,
+                      rounded_box: bool, radius: int) -> Image.Image:
+    """Pega el logo centrado sobre una caja blanca opcional."""
+    if not os.path.exists(logo_path):
+        raise FileNotFoundError(f"No se encontró el logo: {logo_path}")
 
-# Si la imagen tiene canal alpha, usamos alpha como máscara; si no, binarizamos la luminancia
-if "A" in logo_text.getbands():
-    mask_src = logo_text.split()[3]  # canal alpha
-else:
-    mask_src = logo_text.convert("L").point(lambda p: 255 if p < 240 else 0)
+    base = base.copy()
+    bw, bh = base.size
 
-# Queremos que la silueta ocupe casi todo el área del QR dejando una línea de módulos
-margin_px = box_size * 3  # dos líneas de módulos alrededor
-target_w = w - 2 * margin_px
-target_h = h - 2 * margin_px
+    # Escalar logo según el lado del QR
+    target_logo_side = int(min(bw, bh) * scale)
+    logo = Image.open(logo_path).convert("RGBA")
+    logo = ImageOps.contain(logo, (target_logo_side, target_logo_side), method=Image.LANCZOS)
+    lw, lh = logo.size
 
-# Mantener proporciones: redimensionamos maximizando sin salirse
-mask_src = mask_src.convert("L")
-mask_src.thumbnail((target_w, target_h), Image.LANCZOS)
-mask_w, mask_h = mask_src.size
+    # Caja blanca
+    box_w = lw + pad * 2
+    box_h = lh + pad * 2
 
-# Binarizar después de escalar para evitar semitonos
-mask_src = mask_src.point(lambda p: 255 if p > 128 else 0)
+    white_box = Image.new("RGBA", (box_w, box_h), (255, 255, 255, 255))
+    if rounded_box and radius > 0:
+        # Crear máscara redondeada
+        mask = Image.new("L", (box_w, box_h), 0)
+        rr = Image.new("L", (box_w, box_h), 0)
+        rr_draw = Image.new("RGBA", (box_w, box_h), (0, 0, 0, 0))
+        # Truco con ImageOps para redondear
+        white_box = ImageOps.expand(ImageOps.fit(white_box, (box_w, box_h)), border=0, fill=(255, 255, 255, 255))
+        white_box = ImageOps.rounded_rectangle(white_box, radius=radius, fill=(255, 255, 255, 255))
 
-# Pegar la máscara centrada en una máscara del tamaño completo del QR
-mask_full = Image.new("L", (w, h), 0)
-pos_x = (w - mask_w) // 2
-pos_y = (h - mask_h) // 2
-mask_full.paste(mask_src, (pos_x, pos_y))
+    # Posiciones
+    cx = (bw - box_w) // 2
+    cy = (bh - box_h) // 2
+    base.alpha_composite(white_box, (cx, cy))
 
-# 3. Reservar área blanca para el logo central (lo dejamos fuera de la máscara)
-blank_size = logo_size + blank_margin * 2
-blank_x = (w - blank_size) // 2
-blank_y = (h - blank_size) // 2
+    # Pegar logo centrado dentro de la caja
+    lx = cx + (box_w - lw) // 2
+    ly = cy + (box_h - lh) // 2
+    base.alpha_composite(logo, (lx, ly))
+    return base
 
-# Limpiar la máscara en el rectángulo central (para que esa área no sea coloreada)
-mask_pixels = mask_full.load()
-for yy in range(blank_y, blank_y + blank_size):
-    if yy < 0 or yy >= h:
-        continue
-    for xx in range(blank_x, blank_x + blank_size):
-        if xx < 0 or xx >= w:
-            continue
-        mask_pixels[xx, yy] = 0
 
-# 4. Recolorear SOLO los módulos negros que estén dentro de la máscara con degradado metalizado
-colored = qr_img.copy()
-px_col = colored.load()
-px_mask = mask_full.load()
+def main():
+    qr_img = make_qr_image(qr_data, box_size=box_size, border=border)
+    if recolor_qr:
+        qr_img = recolor_qr_vertical(qr_img, color_top, color_bottom)
+    qr_img = paste_logo_center(qr_img, qr_logo_path, logo_scale, white_pad, rounded_white_box, white_box_radius)
+    qr_img.save(out_path)
+    print(f"✅ QR generado: {out_path}")
 
-# Para cálculo de degradado usamos la franja vertical relativa dentro del molde
-for y in range(h):
-    for x in range(w):
-        # Si este pixel está marcado por la máscara y el pixel QR es negro:
-        cur = px_col[x, y]      # RGBA tupla
-        # comparo por RGB (sin transparencia)
-        if px_mask[x, y] > 128 and cur[0:3] == (0, 0, 0):
-            # ratio vertical relativo dentro del área del molde
-            # (clamp para estar seguros)
-            local_y = min(max(y - pos_y, 0), max(mask_h - 1, 1))
-            ratio = local_y / max(mask_h - 1, 1)
 
-            # color base por interpolación linear
-            r_base = int(color_top[0] * (1 - ratio) + color_bottom[0] * ratio)
-            g_base = int(color_top[1] * (1 - ratio) + color_bottom[1] * ratio)
-            b_base = int(color_top[2] * (1 - ratio) + color_bottom[2] * ratio)
-
-            # añadir un brillo sutil tipo "sheen" en la zona central para efecto metalizado
-            sheen = (1 - abs(2 * ratio - 1)) ** 3  # pico en el centro
-            add = int(40 * sheen)  # intensidad del brillo (ajusta 0..60)
-            r = min(255, r_base + add)
-            g = min(255, g_base + add)
-            b = min(255, b_base + add)
-
-            # aplicar color (manteniendo alpha = 255)
-            px_col[x, y] = (r, g, b, 255)
-
-# 5. Dibujar el área blanca central (para que el logo repose en blanco)
-draw = ImageDraw.Draw(colored)
-draw.rectangle([blank_x, blank_y, blank_x + blank_size - 1, blank_y + blank_size - 1], fill=(255, 255, 255, 255))
-
-# 6. Pegar logo centrado (sin borde, tal como pediste)
-logo_center = Image.open(qr_logo_path).convert("RGBA")
-logo_center = logo_center.resize((logo_size, logo_size), Image.LANCZOS)
-logo_pos = ((w - logo_size) // 2, (h - logo_size) // 2)
-colored.paste(logo_center, logo_pos, logo_center)
-
-# 7. HTML ORIGINAL COMPLETO (sin modificaciones)
-html_content = """
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Julian Ramirez | Tarjeta Digital</title>
-  <link rel="stylesheet" href="./statics/css/styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-  <div class="vcard">
-    <div class="amber-fade"></div>
-    <div class="bg-pattern"></div>
-
-    <div class="content">
-      <!-- Foto -->
-      <div class="photo-frame">
-        <img src="./statics/img/foto.jpg" alt="Foto de perfil"
-             onerror="this.src='https://via.placeholder.com/400'">
-      </div>
-
-      <!-- Info -->
-      <div class="info">
-        <h1></h1> <!-- Nombre -->
-        <h2></h2> <!-- Empresa -->
-        <div class="details">
-          <p class="cargo"><i class="fas fa-briefcase"></i></p> <!-- Cargo -->
-          <p class="ubicacion uni"><i class="fas fa-university"></i></p> <!-- Universidad -->
-          <p class="ubicacion direccion"><i class="fas fa-map-marker-alt"></i></p> <!-- Dirección -->
-        </div>
-      </div>
-
-      <!-- Redes -->
-      <div class="social">
-        <a href="#" class="linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="github" title="GitHub"><i class="fab fa-github"></i></a>
-        <a href="#" class="email" title="Email"><i class="fas fa-envelope"></i></a>
-        <a href="#" class="instagram" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-      </div>
-
-      <!-- Mensaje -->
-      <div class="mensaje-box">
-        <div class="mensaje">
-          <p></p>
-        </div>
-      </div>
-        <!-- Guardar contacto -->
-        <div class="guardar-contacto">
-          <a href="#" id="guardarContacto" title="Guardar contacto">
-            <i class="fas fa-address-book"></i>
-          </a>
-        </div>
-    </div>
-  </div>
-
-  <!-- Script unificado -->
-  <script src="./statics/js/scripts.js"></script>
-</body>
-</html>
-"""
-
-# 8. Guardar
-colored.save(out_path)
-
-# 9. Guardar HTML
-with open(html_output_path, "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-print("✅ QR, HTML generados.")
+if __name__ == "__main__":
+    main()
