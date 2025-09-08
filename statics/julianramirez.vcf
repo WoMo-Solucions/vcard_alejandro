@@ -1,16 +1,13 @@
 BEGIN:VCARD
 VERSION:3.0
-FN:Julian Ramirez
-ORG:Full Stack & ABAP Developer
-TITLE: Desarrollador de Software
-ROLE:ID Prof. COPNIA 173619-0790420 VLL 
-TEL:+573183863532
-EMAIL:juliram81@hotmail.com
-URL:https://www.linkedin.com/in/julianramirezc
-URL:https://github.com/ramiju81
-URL:https://instagram.com/eljuliramirez
-URL:https://ramiju81.github.io
+FN:Edward Alejandro Chaverra
+TITLE:Trabajador Social
+ROLE:ID Prof. 
+TEL:+573162234746
+EMAIL:e_a_ch@hotmail.com
+URL:https://instagram.com/e_a_ch
 ADR;TYPE=home:;;Cali - Colombia;;;;
-NOTE:Apasionado por el desarrollo de soluciones digitales que simplifican y transforman procesos reales. Creo en la tecnología como medio para hacer la vida más fácil y automatizada.
-X-SCHOOL:UNICUCES
+NOTE:Profesional en trabajo social. Enfocado en procesos comunitarios y de acompañamiento social. 
+X-SCHOOL:
 END:VCARD
+
